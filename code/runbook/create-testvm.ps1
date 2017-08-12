@@ -115,7 +115,7 @@ Write-Host "Creating a VM ..." -ForegroundColor Green
 
 $vm = New-AzureRmVMConfig -VMName $vmName -VMSize "Standard_A1"
 $vm = Set-AzureRmVMOperatingSystem -VM $vm -Windows -ComputerName $vmName -Credential $credvm -ProvisionVMAgent -EnableAutoUpdate
-$vm = Set-AzureRmVMSourceImage -VM $vm -PublisherName MicrosoftWindowsServer -Offer WindowsServer -Skus 2012-R2-Datacenter -Version "latest"
+$vm = Set-AzureRmVMSourceImage -VM $vm -PublisherName MicrosoftWindowsServer -Offer WindowsServer -Skus 2016-Datacenter  -Version "latest"
 $vm = Add-AzureRmVMNetworkInterface -VM $vm -Id $nic.Id
 $osDiskUri = $storageAcc.PrimaryEndpoints.Blob.ToString() + "vhds/WindowsVMosDisk.vhd"
 $vm = Set-AzureRmVMOSDisk -VM $vm -Name "windowsvmosdisk" -VhdUri $osDiskUri -CreateOption fromImage
