@@ -100,13 +100,21 @@ $feIplbConfig = New-AzureRmLoadBalancerFrontendIpConfig -Name $feIplbConfigName 
 $beIpAaddressPoolConfig = New-AzureRmLoadBalancerBackendAddressPoolConfig -Name $beAddressPoolConfigName
 $healthProbeConfig = New-AzureRmLoadBalancerProbeConfig -Name HealthProbe -RequestPath '\' -Protocol http -Port 80 -IntervalInSeconds 15 -ProbeCount 2
 $lbrule = New-AzureRmLoadBalancerRuleConfig -Name HTTP -FrontendIpConfiguration $feIplbConfig -BackendAddressPool $beIpAaddressPoolConfig -Probe $healthProbe -Protocol Tcp -FrontendPort 80 -BackendPort 80
-$lb = New-AzureRmLoadBalancer -ResourceGroupName $using:resourceGroupName -Name $lbName -Location $using:location -FrontendIpConfiguration $feIplbConfig -LoadBalancingRule $lbrule -BackendAddressPool $beIpAaddressPoolConfig -Probe $healthProbeConfig
+$inboundNATRule1= New-AzureRmLoadBalancerInboundNatRuleConfig -Name RDP1 -FrontendIpConfiguration $feIplbConfig -Protocol TCP -FrontendPort 80 -BackendPort 3389 
+$inboundNATRule2= New-AzureRmLoadBalancerInboundNatRuleConfig -Name RDP2 -FrontendIpConfiguration $feIplbConfig -Protocol TCP -FrontendPort 443 -BackendPort 3389 
+$lb = New-AzureRmLoadBalancer -ResourceGroupName $using:resourceGroupName -Name $lbName -Location $using:location -FrontendIpConfiguration $feIplbConfig -LoadBalancingRule $lbrule -BackendAddressPool $beIpAaddressPoolConfig -Probe $healthProbeConfig -InboundNatRule $inboundNATRule1,$inboundNATRule2
 $nic1 = Get-AzureRmNetworkInterface -Name $using:nic1Name -ResourceGroupName $using:resourceGroupName
 $nic1.IpConfigurations[0].LoadBalancerBackendAddressPools = $beIpAaddressPoolConfig
+$nic1.IpConfigurations[0].LoadBalancerInboundNatRules = $inboundNATRule1
 $nic2 = Get-AzureRmNetworkInterface -Name $using:nic2Name -ResourceGroupName $using:resourceGroupName
 $nic2.IpConfigurations[0].LoadBalancerBackendAddressPools = $beIpAaddressPoolConfig
+$nic2.IpConfigurations[0].LoadBalancerInboundNatRules = $inboundNATRule1
 Set-AzureRmNetworkInterface -NetworkInterface $nic1
 Set-AzureRmNetworkInterface -NetworkInterface $nic2
+
+
+
+
 }
 }
 
