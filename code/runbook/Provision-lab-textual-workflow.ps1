@@ -108,7 +108,7 @@ $nic1.IpConfigurations[0].LoadBalancerBackendAddressPools = $beIpAaddressPoolCon
 $nic1.IpConfigurations[0].LoadBalancerInboundNatRules = $inboundNATRule1
 $nic2 = Get-AzureRmNetworkInterface -Name $using:nic2Name -ResourceGroupName $using:resourceGroupName
 $nic2.IpConfigurations[0].LoadBalancerBackendAddressPools = $beIpAaddressPoolConfig
-$nic2.IpConfigurations[0].LoadBalancerInboundNatRules = $inboundNATRule1
+$nic2.IpConfigurations[0].LoadBalancerInboundNatRules = $inboundNATRule2
 Set-AzureRmNetworkInterface -NetworkInterface $nic1
 Set-AzureRmNetworkInterface -NetworkInterface $nic2
 
@@ -117,4 +117,3 @@ Set-AzureRmNetworkInterface -NetworkInterface $nic2
 
 }
 }
-
