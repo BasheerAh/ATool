@@ -92,16 +92,20 @@ New-AzureRmVM -ResourceGroupName $using:resourceGroupName -Location $using:locat
 }
 InlineScript {
 $publicIplbName = $using:resourceGroupName + 'lb-pip1'
+$publicIplbName2 = $using:resourceGroupName + 'lb-pip2'
 $feIplbConfigName = $using:resourceGroupName + '-felbipconfig'
+$feIplbConfigName2 = $using:resourceGroupName + '-felbipconfig2'
 $beAddressPoolConfigName = $using:resourceGroupName + '-beipapconfig'
 $lbName = $using:resourceGroupName + 'lb'
 $publicIplb = New-AzureRmPublicIpAddress -Name $publicIplbName -ResourceGroupName $using:resourceGroupName -Location $using:location -AllocationMethod Dynamic
+$publicIplb2 = New-AzureRmPublicIpAddress -Name $publicIplbName2 -ResourceGroupName $using:resourceGroupName -Location $using:location -AllocationMethod Dynamic
 $feIplbConfig = New-AzureRmLoadBalancerFrontendIpConfig -Name $feIplbConfigName -PublicIpAddress $publicIplb
+$feIplbConfig2 = New-AzureRmLoadBalancerFrontendIpConfig -Name $feIplbConfigName2 -PublicIpAddress $publicIplb2
 $beIpAaddressPoolConfig = New-AzureRmLoadBalancerBackendAddressPoolConfig -Name $beAddressPoolConfigName
 $healthProbeConfig = New-AzureRmLoadBalancerProbeConfig -Name HealthProbe -RequestPath '\' -Protocol http -Port 80 -IntervalInSeconds 15 -ProbeCount 2
 $lbrule = New-AzureRmLoadBalancerRuleConfig -Name HTTP -FrontendIpConfiguration $feIplbConfig -BackendAddressPool $beIpAaddressPoolConfig -Probe $healthProbe -Protocol Tcp -FrontendPort 80 -BackendPort 80
-$inboundNATRule1= New-AzureRmLoadBalancerInboundNatRuleConfig -Name RDP1 -FrontendIpConfiguration $feIplbConfig -Protocol TCP -FrontendPort 80 -BackendPort 3389 
-$inboundNATRule2= New-AzureRmLoadBalancerInboundNatRuleConfig -Name RDP2 -FrontendIpConfiguration $feIplbConfig -Protocol TCP -FrontendPort 443 -BackendPort 3389 
+$inboundNATRule1= New-AzureRmLoadBalancerInboundNatRuleConfig -Name RDP1 -FrontendIpConfiguration $feIplbConfig -Protocol TCP -FrontendPort 443 -BackendPort 3389 
+$inboundNATRule2= New-AzureRmLoadBalancerInboundNatRuleConfig -Name RDP2 -FrontendIpConfiguration $feIplbConfig2 -Protocol TCP -FrontendPort 443 -BackendPort 3389 
 $lb = New-AzureRmLoadBalancer -ResourceGroupName $using:resourceGroupName -Name $lbName -Location $using:location -FrontendIpConfiguration $feIplbConfig -LoadBalancingRule $lbrule -BackendAddressPool $beIpAaddressPoolConfig -Probe $healthProbeConfig -InboundNatRule $inboundNATRule1,$inboundNATRule2
 $nic1 = Get-AzureRmNetworkInterface -Name $using:nic1Name -ResourceGroupName $using:resourceGroupName
 $nic1.IpConfigurations[0].LoadBalancerBackendAddressPools = $beIpAaddressPoolConfig
