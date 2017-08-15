@@ -23,7 +23,7 @@ $vmosDiskSize = 128
 $publicIpvm1Name = $resourceGroupName + $vm1Name + '-pip1'
 $publicIpvm2Name = $resourceGroupName + $vm2Name + '-pip1'
 $nic1Name = $resourceGroupName + $vm1Name + '-nic1'
-$nic2Name = $resourceGroupName + $vm2Name + '-nic2'
+$nic2Name = $resourceGroupName + $vm2Name + '-nic1'
 $vm1osDiskName = $resourceGroupName + $vm1Name + 'osdisk'
 $vm2osDiskName = $resourceGroupName + $vm2Name + 'osdisk'
 $resourceGroup = New-AzureRmResourceGroup -Name $resourceGroupName -Location $location
@@ -63,9 +63,9 @@ $vm1 = Add-AzureRmVMNetworkInterface -VM $vm1 -Id $nic1.Id
 New-AzureRmVM -ResourceGroupName $using:resourceGroupName -Location $using:location -VM $vm1
 }
 InlineScript {
-$vnet = Get-AzureRmVirtualNetwork -Name $using:vnetName -ResourceGroupName $using:resourceGroupName
+$vnet2 = Get-AzureRmVirtualNetwork -Name $using:vnetName -ResourceGroupName $using:resourceGroupName
 $publicIpvm2 = New-AzureRmPublicIpAddress -Name $using:publicIpvm2Name -ResourceGroupName $using:resourceGroupName -Location $using:location -AllocationMethod Dynamic
-$nic2 = New-AzureRmNetworkInterface -Name $using:nic2Name -ResourceGroupName $using:resourceGroupName -Location $using:location -SubnetId $vNet.Subnets[0].Id -PublicIpAddressId $publicIpvm2.Id
+$nic2 = New-AzureRmNetworkInterface -Name $using:nic2Name -ResourceGroupName $using:resourceGroupName -Location $using:location -SubnetId $vNet2.Subnets[0].Id -PublicIpAddressId $publicIpvm2.Id
 $vm2 = New-AzureRmVMConfig -VMName $using:vm2Name -VMSize $using:vmSize -AvailabilitySetId $using:avSet.Id
 $randomnumber2 = Get-Random -Minimum 0 -Maximum 99999999
 $tempName2 = ($using:resourceGroupName + $using:vm2Name + $randomnumber2).ToLower()
@@ -106,7 +106,8 @@ $healthProbeConfig = New-AzureRmLoadBalancerProbeConfig -Name HealthProbe -Reque
 $lbrule = New-AzureRmLoadBalancerRuleConfig -Name HTTP -FrontendIpConfiguration $feIplbConfig -BackendAddressPool $beIpAaddressPoolConfig -Probe $healthProbe -Protocol Tcp -FrontendPort 80 -BackendPort 80
 $inboundNATRule1= New-AzureRmLoadBalancerInboundNatRuleConfig -Name RDP1 -FrontendIpConfiguration $feIplbConfig -Protocol TCP -FrontendPort 443 -BackendPort 3389 
 $inboundNATRule2= New-AzureRmLoadBalancerInboundNatRuleConfig -Name RDP2 -FrontendIpConfiguration $feIplbConfig2 -Protocol TCP -FrontendPort 443 -BackendPort 3389 
-$lb = New-AzureRmLoadBalancer -ResourceGroupName $using:resourceGroupName -Name $lbName -Location $using:location -FrontendIpConfiguration $feIplbConfig -LoadBalancingRule $lbrule -BackendAddressPool $beIpAaddressPoolConfig -Probe $healthProbeConfig -InboundNatRule $inboundNATRule1,$inboundNATRule2
+$lb = New-AzureRmLoadBalancer -ResourceGroupName $using:resourceGroupName -Name $lbName -Location $using:location -FrontendIpConfiguration $feIplbConfig,$feIplbConfig2 -LoadBalancingRule $lbrule -BackendAddressPool $beIpAaddressPoolConfig -Probe $healthProbeConfig -InboundNatRule $inboundNATRule1,$inboundNATRule2
+
 $nic1 = Get-AzureRmNetworkInterface -Name $using:nic1Name -ResourceGroupName $using:resourceGroupName
 $nic1.IpConfigurations[0].LoadBalancerBackendAddressPools = $beIpAaddressPoolConfig
 $nic1.IpConfigurations[0].LoadBalancerInboundNatRules = $inboundNATRule1
